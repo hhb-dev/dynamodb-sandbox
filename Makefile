@@ -1,2 +1,0 @@
-start:
-	./gradlew bootrun

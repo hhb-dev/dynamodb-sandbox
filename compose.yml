@@ -1,0 +1,36 @@
+version: "3.8"
+name: dynamodb-sandbox
+services:
+  #  backend:
+  #    build:
+  #      context: backend
+  #      dockerfile: Dockerfile
+  #    ports:
+  #      - "8080:8080"
+  #    volumes:
+  #      - ./backend:/app
+  dynamo:
+    command: "-jar DynamoDBLocal.jar -sharedDb -dbPath ./data"
+    image: amazon/dynamodb-local
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./docker/dynamodbdata:/home/dynamodblocal/data
+    working_dir: /home/dynamodblocal
+  dynamodb-admin:
+    image: aaronshaf/dynamodb-admin
+    ports:
+      - "8001:8001"
+    environment:
+      - DYNAMO_ENDPOINT=http://dynamo:8000
+  dynamodb-init:
+    depends_on:
+      - dynamo
+    image: amazon/aws-cli
+    ports:
+      - "8082:8082"
+    environment:
+      AWS_ACCESS_KEY_ID: 'dummy'
+      AWS_SECRET_ACCESS_KEY: 'dummy'
+    command:
+      dynamodb describe-limits --endpoint-url http://dynamodb-local:8000 --region ap-northeast-1
